@@ -1,0 +1,102 @@
+<template>
+    <div class="table">
+        <el-table :data="list" style="width: 100%" height="500">
+            <el-table-column v-for="item in tableLabel" :key="item.prop" :label="item.label" :prop="item.prop"
+                :width="item.width ? item.width : 125" />
+            <el-table-column fixed="right" label="操作" min-width="180">
+                <template #default>
+                    <el-button type="primary" size="small">
+                        编辑
+                    </el-button>
+                    <el-button type="danger" size="small">删除</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <el-pagination
+        small
+        background
+        layout="prev,pager,next"
+        :total="config.total"
+        @current-change="changePage"
+        class="pager"
+        />
+    </div>
+</template>
+
+<script>
+import { getCurrentInstance } from 'vue';
+import { reactive, ref } from 'vue';
+import { defineComponent } from 'vue';
+import { onMounted } from 'vue';
+
+export default defineComponent({
+    setup() {
+        const { proxy } = getCurrentInstance()
+        const list = ref([])
+        const tableLabel = reactive([
+            {
+                prop: "name",
+                label: '姓名'
+            },
+            {
+                prop: "age",
+                label: '年龄'
+            },
+            {
+                prop: "sexLabel",
+                label: '性别'
+            },
+            {
+                prop: "birth",
+                label: '出生日期',
+                width: 200
+            },
+            {
+                prop: "addr",
+                label: '地址',
+                width: 320
+            }
+        ])
+
+        onMounted(() => {
+            getUserData(config)
+        })
+        const config=reactive({
+            total:0,
+            page:1
+        })
+
+        const getUserData = async (config) => {
+            let res = await proxy.$api.getUserData(config)
+            config.total=res.count
+            list.value = res.list.map((item) => {
+                item.sexLabel = item.sex === 0 ? '女' : '男'
+                return item
+            })
+        }
+
+        const changePage=(page)=>{
+            config.page=page
+            getUserData(config)
+        }
+        return {
+            list,
+            tableLabel,
+            config,
+            changePage
+        }
+    }
+})
+</script>
+
+<style lang="less" scoped>
+.table{
+    position: relative;
+    height: 520px;
+    .pager{
+        position: absolute;
+        right: 0;
+        bottom: -20px;
+    }
+}
+</style>
