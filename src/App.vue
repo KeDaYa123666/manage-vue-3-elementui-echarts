@@ -1,8 +1,8 @@
 <script setup>
-
 </script>
 
 <template>
+  <!-- 路由展示区 -->
   <router-view />
 </template>
 
